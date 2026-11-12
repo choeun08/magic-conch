@@ -1,0 +1,5 @@
+# 4주차 음성 기능용 (기본 버전은 설치 없이 실행됨)
+SpeechRecognition
+pyttsx3
+pyaudio
+pyinstaller
