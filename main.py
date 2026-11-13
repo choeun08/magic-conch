@@ -1,17 +1,8 @@
-"""
-마법의 소라고동 - TTS 적용 버전
-
-① 시작 화면
-② 질문 입력 후 줄 클릭
-③ 답변 팝업 + 음성 출력
-④ 다시하기
-"""
 
 import tkinter as tk
-import threading
-import pyttsx3
 
 from answers import pick_answer
+from tts import speak
 
 # ---------------- 화면 설정 ----------------
 WIDTH, HEIGHT = 420, 600
@@ -239,34 +230,6 @@ class ConchApp:
 
         self.root.after(STEP_MS, self.animate, step + 1)
 
-    # ---------------- TTS 음성 출력 ----------------
-
-    def speak_answer(self, answer):
-        try:
-            engine = pyttsx3.init()
-
-            engine.setProperty("rate", 185)
-            engine.setProperty("volume", 1.0)
-
-            voices = engine.getProperty("voices")
-
-            for voice in voices:
-                voice_info = (voice.name + " " + voice.id).lower()
-
-                if ("korean" in voice_info or
-                    "ko-kr" in voice_info or
-                    "한국" in voice_info):
-
-                    engine.setProperty("voice", voice.id)
-                    break
-
-            engine.say(answer)
-            engine.runAndWait()
-            engine.stop()
-
-        except Exception as e:
-            print("음성 출력 오류:", e)
-
     # ---------------- 답변 팝업 ----------------
 
     def show_answer(self):
@@ -315,11 +278,7 @@ class ConchApp:
         popup.grab_set()
         self.popup = popup
 
-        threading.Thread(
-            target=self.speak_answer,
-            args=(answer,),
-            daemon=True
-        ).start()
+        speak(answer)
 
     # ---------------- 다시하기 ----------------
 
