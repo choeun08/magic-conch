@@ -1,4 +1,5 @@
 
+import threading
 import tkinter as tk
 
 from answers import pick_answer
@@ -221,7 +222,7 @@ class ConchApp:
             progress = (STEPS * 2 - step) / STEPS
 
         else:
-            self.show_answer()
+            self.start_voice()
             return
 
         self.set_string_length(
@@ -229,6 +230,22 @@ class ConchApp:
         )
 
         self.root.after(STEP_MS, self.animate, step + 1)
+
+    # ---------------- 목소리 시작 → 팝업 ----------------
+
+    def start_voice(self):
+        """답을 고르고 목소리부터 시작시킨다. 말하기 시작하면 팝업을 띄운다."""
+        self.answer = pick_answer()
+        self.voice_started = threading.Event()
+        speak(self.answer, self.voice_started)
+        self.wait_voice(0)
+
+    def wait_voice(self, waited_ms):
+        """목소리가 시작됐는지 0.02초마다 확인한다. (최대 1.5초 기다림)"""
+        if self.voice_started.is_set() or waited_ms >= 1500:
+            self.show_answer()
+            return
+        self.root.after(20, self.wait_voice, waited_ms + 20)
 
     # ---------------- 답변 팝업 ----------------
 
@@ -253,11 +270,9 @@ class ConchApp:
             bg=BG
         ).pack(pady=(20, 5))
 
-        answer = pick_answer()
-
         self.answer_label = tk.Label(
             popup,
-            text=answer,
+            text=self.answer,
             font=(FONT, 20, "bold"),
             bg=BG,
             wraplength=300
@@ -277,8 +292,6 @@ class ConchApp:
 
         popup.grab_set()
         self.popup = popup
-
-        speak(answer)
 
     # ---------------- 다시하기 ----------------
 
